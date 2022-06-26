@@ -7,12 +7,11 @@ import (
 	"os"
 )
 
-const templateHTMLPath = "./web/"
-const templateHTMLFile = "template.html"
+const templateHTMLFile = "./web/template.html"
 
 func MainPageHandler(w http.ResponseWriter, req *http.Request) {
 	// Load template HTML
-	loginPage, err := os.ReadFile(templateHTMLPath + templateHTMLFile)
+	loginPage, err := os.ReadFile(templateHTMLFile)
 	if err != nil {
 		log.Println(err)
 		http.Error(w, "Failed to read template HTML", http.StatusInternalServerError)
