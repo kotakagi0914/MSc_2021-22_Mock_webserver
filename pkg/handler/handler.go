@@ -5,12 +5,14 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 )
 
 const (
-	templateHTMLFile = "./web/template.html"
-	validUsername    = "admin"
-	validPassword    = "password"
+	templateHTMLFile    = "./web/template.html"
+	validUsername       = "admin"
+	validPassword       = "password"
+	recaptchaScoreQuery = "recaptchaScore"
 )
 
 func MainPageHandler(w http.ResponseWriter, r *http.Request) {
@@ -37,31 +39,45 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	un := r.FormValue("username")
 	pw := r.FormValue("password")
 
-	if un != validUsername && pw != validPassword {
+	if un != validUsername || pw != validPassword {
 		log.Println("Invalid username or password")
-		http.Error(w, "Invalid username or password", http.StatusUnauthorized)
+		http.Redirect(w, r, "/failure", http.StatusFound)
 		return
 	}
 
-	fmt.Fprint(w, "Login successful\n")
+	// Verify reCAPTCHA score by sending request to Google
+	// Dummy valu for now
+	score := "0.5"
+
+	http.Redirect(w, r, "/success?"+recaptchaScoreQuery+"="+score, http.StatusFound)
 }
 
 func SuccessPageHandler(w http.ResponseWriter, r *http.Request) {
+	score := r.URL.Query().Get(recaptchaScoreQuery)
+	floatScore, err := strconv.ParseFloat(score, 64)
+	if err != nil {
+		log.Println("Invalid score type: ", err)
+		http.Error(w, "Invalid score type", http.StatusBadRequest)
+		return
+	}
 
+	fmt.Fprintf(w, "Login Success: %f", floatScore)
 }
 
 func FailurePageHandler(w http.ResponseWriter, r *http.Request) {
-
+	log.Println("Login Failure")
+	http.Error(w, "Login Failure", http.StatusBadRequest)
 }
 
 /*
 # Reference
 - https://pkg.go.dev/net/http
+- https://gobyexample.com/http-servers
 - https://gobyexample.com/reading-files
 
 # Line Count
-- Total:      28
+- Total:      70
 - Reused:     0
-- Written:    3
-- Referenced: 25
+- Written:    64
+- Referenced: 6
 */
