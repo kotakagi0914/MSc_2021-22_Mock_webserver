@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	templateHTMLFile    = "./web/template.html"
+	templateHTMLFile    = "./web/login-page.html"
 	validUsername       = "admin"
 	validPassword       = "password"
 	recaptchaScoreQuery = "recaptchaScore"
