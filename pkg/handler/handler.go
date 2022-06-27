@@ -7,7 +7,11 @@ import (
 	"os"
 )
 
-const templateHTMLFile = "./web/template.html"
+const (
+	templateHTMLFile = "./web/template.html"
+	validUsername    = "admin"
+	validPassword    = "password"
+)
 
 func MainPageHandler(w http.ResponseWriter, r *http.Request) {
 	// Load template HTML
@@ -23,6 +27,23 @@ func MainPageHandler(w http.ResponseWriter, r *http.Request) {
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	// Stop processing if request is NOT POST
+	if r.Method != "POST" {
+		log.Println("Invalid HTTP method")
+		http.Error(w, "Invalid HTTP method", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Obtain username and password
+	un := r.FormValue("username")
+	pw := r.FormValue("password")
+
+	if un != validUsername && pw != validPassword {
+		log.Println("Invalid username or password")
+		http.Error(w, "Invalid username or password", http.StatusUnauthorized)
+		return
+	}
+
+	fmt.Fprint(w, "Login successful\n")
 }
 
 func SuccessPageHandler(w http.ResponseWriter, r *http.Request) {
