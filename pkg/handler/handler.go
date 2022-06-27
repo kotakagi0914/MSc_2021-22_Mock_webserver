@@ -9,7 +9,7 @@ import (
 
 const templateHTMLFile = "./web/template.html"
 
-func MainPageHandler(w http.ResponseWriter, req *http.Request) {
+func MainPageHandler(w http.ResponseWriter, r *http.Request) {
 	// Load template HTML
 	loginPage, err := os.ReadFile(templateHTMLFile)
 	if err != nil {
@@ -21,15 +21,15 @@ func MainPageHandler(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprint(w, string(loginPage))
 }
 
-func LoginHandler(w http.ResponseWriter, req *http.Request) {
+func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	// Stop processing if request is NOT POST
 }
 
-func SuccessPageHandler(w http.ResponseWriter, req *http.Request) {
+func SuccessPageHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func FailurePageHandler(w http.ResponseWriter, req *http.Request) {
+func FailurePageHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
