@@ -76,6 +76,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	un := r.FormValue("username")
 	pw := r.FormValue("password")
 	urToken := r.FormValue("ur-token")
+	log.Println("User Response token: ", urToken)
 
 	// Check if the login credentials are valid
 	if un != validUsername || pw != validPassword {
@@ -87,7 +88,6 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	// Verify reCAPTCHA score by sending request to Google
 	// Dummy value for now
 	score := "0.5"
-	log.Println("User Response token: ", urToken)
 
 	http.Redirect(w, r, "/success?"+recaptchaScoreQuery+"="+score, http.StatusFound)
 }
