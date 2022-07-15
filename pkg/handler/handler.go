@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	templateHTMLFile    = "./web/login-page.html"
+	templateHTMLFile    = "./web/template/login-page.html"
 	secretFile          = "./.secret"
 	validUsername       = "admin"
 	validPassword       = "password"
