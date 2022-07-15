@@ -37,8 +37,8 @@ func (s *Server) Run() error {
 - https://pkg.go.dev/net/http
 
 # Line Count
-- Total:      28
+- Total:      33
 - Reused:     0
-- Written:    23
+- Written:    28
 - Referenced: 5
 */
