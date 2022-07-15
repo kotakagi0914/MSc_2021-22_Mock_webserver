@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -10,10 +11,19 @@ import (
 
 const (
 	templateHTMLFile    = "./web/login-page.html"
+	secretFile          = "./.secret"
 	validUsername       = "admin"
 	validPassword       = "password"
 	recaptchaScoreQuery = "recaptchaScore"
 )
+
+// Struct for reCAPTCHA secret containing site-key and secret-key
+type reCAPTCHASecretStruct struct {
+	SiteKey   string `json:"site-key"`
+	SecretKey string `json:"secret-key"`
+}
+
+var recaptchaSecret reCAPTCHASecretStruct
 
 func Init() (*http.ServeMux, error) {
 	// Initialise HTTP server handler
@@ -22,6 +32,19 @@ func Init() (*http.ServeMux, error) {
 	h.HandleFunc("/login", LoginHandler)
 	h.HandleFunc("/success", SuccessPageHandler)
 	h.HandleFunc("/failure", FailurePageHandler)
+
+	// Load site-key and
+	secretJsonByte, err := os.ReadFile(secretFile)
+	if err != nil {
+		log.Println("Failed to read reCAPTCHA secret file: ", err)
+		return nil, err
+	}
+
+	// Unmarshal JSON byte into Golang struct
+	if err := json.Unmarshal(secretJsonByte, &recaptchaSecret); err != nil {
+		log.Println("Failed to unmarshal reCAPTCHA secret: ", err)
+		return nil, err
+	}
 
 	return h, nil
 }
@@ -85,10 +108,11 @@ func FailurePageHandler(w http.ResponseWriter, r *http.Request) {
 - https://pkg.go.dev/net/http
 - https://gobyexample.com/http-servers
 - https://gobyexample.com/reading-files
+- https://gobyexample.com/json
 
 # Line Count
-- Total:      80
+- Total:      104
 - Reused:     0
-- Written:    74
-- Referenced: 6
+- Written:    92
+- Referenced: 12
 */
