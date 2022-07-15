@@ -19,8 +19,8 @@ func main() {
 
 /*
 # Line Count
-- Total:      14
+- Total:      18
 - Reused:     0
-- Written:    14
+- Written:    18
 - Referenced: 0
 */
