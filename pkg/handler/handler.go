@@ -15,7 +15,7 @@ const (
 	recaptchaScoreQuery = "recaptchaScore"
 )
 
-func Init() *http.ServeMux {
+func Init() (*http.ServeMux, error) {
 	// Initialise HTTP server handler
 	h := http.NewServeMux()
 	h.HandleFunc("/", MainPageHandler)
@@ -23,7 +23,7 @@ func Init() *http.ServeMux {
 	h.HandleFunc("/success", SuccessPageHandler)
 	h.HandleFunc("/failure", FailurePageHandler)
 
-	return h
+	return h, nil
 }
 
 func MainPageHandler(w http.ResponseWriter, r *http.Request) {

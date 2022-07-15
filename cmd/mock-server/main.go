@@ -7,9 +7,13 @@ import (
 )
 
 func main() {
-	s := server.New()
+	s, err := server.New()
+	if err != nil {
+		log.Fatalln("Failed to initialise server: ", err)
+	}
+
 	if err := s.Run(); err != nil {
-		log.Fatal(err)
+		log.Fatalln("Failed to run server: ", err)
 	}
 }
 

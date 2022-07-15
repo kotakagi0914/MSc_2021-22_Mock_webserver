@@ -1,6 +1,7 @@
 package server
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/sheva0914/MSc_2021-22_Mock_webserver/pkg/handler"
@@ -12,15 +13,19 @@ type Server struct {
 	s *http.Server
 }
 
-func New() *Server {
-	h := handler.Init()
+func New() (*Server, error) {
+	h, err := handler.Init()
+	if err != nil {
+		log.Println("Failed to initialise handler pkg: ", err)
+		return nil, err
+	}
 
 	return &Server{
 		s: &http.Server{
 			Addr:    port,
 			Handler: h,
 		},
-	}
+	}, nil
 }
 
 func (s *Server) Run() error {
