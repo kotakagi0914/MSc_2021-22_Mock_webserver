@@ -15,6 +15,17 @@ const (
 	recaptchaScoreQuery = "recaptchaScore"
 )
 
+func Init() *http.ServeMux {
+	// Initialise HTTP server handler
+	h := http.NewServeMux()
+	h.HandleFunc("/", MainPageHandler)
+	h.HandleFunc("/login", LoginHandler)
+	h.HandleFunc("/success", SuccessPageHandler)
+	h.HandleFunc("/failure", FailurePageHandler)
+
+	return h
+}
+
 func MainPageHandler(w http.ResponseWriter, r *http.Request) {
 	// Load template HTML
 	loginPage, err := os.ReadFile(templateHTMLFile)
@@ -76,8 +87,8 @@ func FailurePageHandler(w http.ResponseWriter, r *http.Request) {
 - https://gobyexample.com/reading-files
 
 # Line Count
-- Total:      70
+- Total:      80
 - Reused:     0
-- Written:    64
+- Written:    74
 - Referenced: 6
 */

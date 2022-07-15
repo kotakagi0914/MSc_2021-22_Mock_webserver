@@ -13,11 +13,7 @@ type Server struct {
 }
 
 func New() *Server {
-	h := http.NewServeMux()
-	h.HandleFunc("/", handler.MainPageHandler)
-	h.HandleFunc("/login", handler.LoginHandler)
-	h.HandleFunc("/success", handler.SuccessPageHandler)
-	h.HandleFunc("/failure", handler.FailurePageHandler)
+	h := handler.Init()
 
 	return &Server{
 		s: &http.Server{
@@ -36,8 +32,8 @@ func (s *Server) Run() error {
 - https://pkg.go.dev/net/http
 
 # Line Count
-- Total:      32
+- Total:      28
 - Reused:     0
-- Written:    28
+- Written:    23
 - Referenced: 5
 */
