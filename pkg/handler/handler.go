@@ -23,7 +23,10 @@ type reCAPTCHASecretStruct struct {
 	SecretKey string `json:"secret-key"`
 }
 
-var recaptchaSecret reCAPTCHASecretStruct
+var (
+	recaptchaSecret reCAPTCHASecretStruct
+	loginPageHTML   string
+)
 
 func Init() (*http.ServeMux, error) {
 	// Initialise HTTP server handler
@@ -32,6 +35,14 @@ func Init() (*http.ServeMux, error) {
 	h.HandleFunc("/login", LoginHandler)
 	h.HandleFunc("/success", SuccessPageHandler)
 	h.HandleFunc("/failure", FailurePageHandler)
+
+	// Load login page template
+	loginPageByte, err := os.ReadFile(templateHTMLFile)
+	if err != nil {
+		log.Println("Failed to load login page template", err)
+		return nil, err
+	}
+	loginPageHTML = string(loginPageByte)
 
 	// Load site-key and
 	secretJsonByte, err := os.ReadFile(secretFile)
@@ -50,15 +61,7 @@ func Init() (*http.ServeMux, error) {
 }
 
 func MainPageHandler(w http.ResponseWriter, r *http.Request) {
-	// Load template HTML
-	loginPage, err := os.ReadFile(templateHTMLFile)
-	if err != nil {
-		log.Println(err)
-		http.Error(w, "Failed to read template HTML", http.StatusInternalServerError)
-		return
-	}
-
-	fmt.Fprint(w, string(loginPage))
+	fmt.Fprint(w, loginPageHTML)
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
