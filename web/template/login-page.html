@@ -25,8 +25,8 @@
             <div><input type="submit" value="Login"></div>
         </div>
     </form>
+    <script src="https://www.google.com/recaptcha/api.js?render={{.SiteKey}}"></script>
     <script>
-        const siteKey = "{{.SiteKey}}";
         document.querySelector('input[name="ur-token"]').value = 'test value';
     </script>
 </body>
