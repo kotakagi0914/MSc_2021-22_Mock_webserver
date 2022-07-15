@@ -72,10 +72,11 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Obtain username and password
+	// Obtain username and password from POST body in request
 	un := r.FormValue("username")
 	pw := r.FormValue("password")
 
+	// Check if the login credentials are valid
 	if un != validUsername || pw != validPassword {
 		log.Println("Invalid username or password")
 		http.Redirect(w, r, "/failure", http.StatusFound)
@@ -83,7 +84,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Verify reCAPTCHA score by sending request to Google
-	// Dummy valu for now
+	// Dummy value for now
 	score := "0.5"
 
 	http.Redirect(w, r, "/success?"+recaptchaScoreQuery+"="+score, http.StatusFound)
@@ -114,8 +115,8 @@ func FailurePageHandler(w http.ResponseWriter, r *http.Request) {
 - https://gobyexample.com/json
 
 # Line Count
-- Total:      104
+- Total:      108
 - Reused:     0
-- Written:    92
+- Written:    96
 - Referenced: 12
 */
