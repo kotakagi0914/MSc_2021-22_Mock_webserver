@@ -1,8 +1,10 @@
 package handler
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -37,12 +39,11 @@ func Init() (*http.ServeMux, error) {
 	h.HandleFunc("/failure", FailurePageHandler)
 
 	// Load login page template
-	loginPageByte, err := os.ReadFile(templateHTMLFile)
+	loginPageTemplateByte, err := os.ReadFile(templateHTMLFile)
 	if err != nil {
 		log.Println("Failed to load login page template", err)
 		return nil, err
 	}
-	loginPageHTML = string(loginPageByte)
 
 	// Load site-key and
 	secretJsonByte, err := os.ReadFile(secretFile)
@@ -56,6 +57,21 @@ func Init() (*http.ServeMux, error) {
 		log.Println("Failed to unmarshal reCAPTCHA secret: ", err)
 		return nil, err
 	}
+
+	// Create template instance for login page
+	loginPageTemp, err := template.New("loginpage").Parse(string(loginPageTemplateByte))
+	if err != nil {
+		log.Println("Failed to create new template instance: ", err)
+		return nil, err
+	}
+
+	// Set site-key into login page HTML
+	loginPageByte := new(bytes.Buffer)
+	if err := loginPageTemp.Execute(loginPageByte, recaptchaSecret); err != nil {
+		log.Println("Failed to inject values into template: ", err)
+		return nil, err
+	}
+	loginPageHTML = loginPageByte.String()
 
 	return h, nil
 }
@@ -115,10 +131,12 @@ func FailurePageHandler(w http.ResponseWriter, r *http.Request) {
 - https://gobyexample.com/http-servers
 - https://gobyexample.com/reading-files
 - https://gobyexample.com/json
+- https://pkg.go.dev/html/template
+- https://stackoverflow.com/questions/13765797/the-best-way-to-get-a-string-from-a-writer
 
 # Line Count
-- Total:      110
+- Total:      126
 - Reused:     0
-- Written:    98
-- Referenced: 12
+- Written:    107
+- Referenced: 19
 */
