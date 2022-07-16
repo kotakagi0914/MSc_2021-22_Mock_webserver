@@ -27,6 +27,7 @@
     </form>
     <script src="https://www.google.com/recaptcha/api.js?render={{.SiteKey}}"></script>
     <script>
+        grecaptcha.ready();
         document.querySelector('input[name="ur-token"]').value = 'test value';
     </script>
 </body>
