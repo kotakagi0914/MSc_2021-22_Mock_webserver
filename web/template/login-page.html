@@ -15,22 +15,29 @@
 <body>
     <h2>Mock Web Service</h2>
     <h3>Login Form</h3>
-    <form method="post" action="/login">
+    <form name="login" method="post" action="/login">
         <div class="login-form">
             <div>Username:</div>
             <div><input name="username"></div>
             <div>Password:</div>
             <div><input name="password"></div>
             <div><input name="ur-token" value="a" type="hidden"></div>
-            <div><input name= "submit" type="submit" value="Login"></div>
+            <div><input name= "submit" type="submit" value="Login" onclick="beforeSubmission(event)"></div>
         </div>
     </form>
     <script src="https://www.google.com/recaptcha/api.js?render={{.SiteKey}}"></script>
     <script>
         grecaptcha.ready();
-        document.querySelector('input[name="submit"]').addEventListener('click', e => {
-            document.querySelector('input[name="ur-token"]').value = 'test value';
-        });
+
+        const form = document.querySelector('form[name="login"]');
+
+        async function beforeSubmission(e) {
+            e.preventDefault();
+            await grecaptcha.execute('{{.SiteKey}}', {action: 'login'}).then(token => {
+                document.querySelector('input[name="ur-token"]').value = token;
+            });
+            form.requestSubmit();
+        };
     </script>
 </body>
 </html>
@@ -40,11 +47,12 @@
 - https://tryhackme.com/room/phishingyl
 - https://www.w3schools.com/tags/att_input_type_hidden.asp
 - https://stackoverflow.com/questions/7609130/set-the-value-of-an-input-field#answer-64918427
+- https://developers.google.com/recaptcha/docs/v3
+- https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
 
 # Line Count
-- Total:      32
+- Total:      43
 - Reused:     25
-- Written:    5
-- Referenced: 2
+- Written:    11
+- Referenced: 7
 -->
-
