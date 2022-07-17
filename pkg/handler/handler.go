@@ -45,14 +45,14 @@ func Init() (*http.ServeMux, error) {
 		return nil, err
 	}
 
-	// Load site-key and
+	// Load site-key and secret-key from `.secret` file
 	secretJsonByte, err := os.ReadFile(secretFile)
 	if err != nil {
 		log.Println("Failed to read reCAPTCHA secret file: ", err)
 		return nil, err
 	}
 
-	// Unmarshal JSON byte into Golang struct
+	// Unmarshal JSON byte into reCAPTCHASecretStruct type
 	if err := json.Unmarshal(secretJsonByte, &recaptchaSecret); err != nil {
 		log.Println("Failed to unmarshal reCAPTCHA secret: ", err)
 		return nil, err
