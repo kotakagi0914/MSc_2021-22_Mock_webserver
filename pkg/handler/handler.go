@@ -55,6 +55,7 @@ func Init() (*http.ServeMux, error) {
 	h := http.NewServeMux()
 	h.HandleFunc("/", MainPageHandler)
 	h.HandleFunc("/login", LoginHandler)
+	h.HandleFunc("/login-result", LoginResultHandler)
 	h.HandleFunc("/success", SuccessPageHandler)
 	h.HandleFunc("/failure", FailurePageHandler)
 
@@ -145,16 +146,66 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Check if the login credentials are valid
 	if un != validUsername || pw != validPassword {
-		log.Println("Invalid username or password")
-		http.Redirect(w, r, "/failure", http.StatusFound)
+		loginErrStr = "Invalid username or password"
+		log.Println(loginErrStr)
+		http.Redirect(
+			w,
+			r,
+			makeQueryString(isLoginSuccess, isReCAPTCHASuccess, loginErrStr, reCAPTCHAScore),
+			http.StatusFound,
+		)
+		// http.Redirect(w, r, "/failure", http.StatusFound)
+		return
+	}
+	isLoginSuccess = true
+
+	http.Redirect(w, r, fmt.Sprintf("/success?%s=%f", reCAPTCHAScoreQueryStr, reCAPTCHAScore), http.StatusFound)
+}
+
+func LoginResultHandler(w http.ResponseWriter, r *http.Request) {
+	loginSuccessStr := r.URL.Query().Get(loginSuccessQueryStr)
+	var isLoginSuccess bool
+	if loginSuccessStr == "true" {
+		isLoginSuccess = true
+	}
+
+	loginErrorStr := r.URL.Query().Get(loginErrorQueryStr)
+
+	reCAPTCHASuccessStr := r.URL.Query().Get(reCAPTCHASuccessQueryStr)
+	var isReCAPTCHASuccess bool
+	if reCAPTCHASuccessStr == "true" {
+		isReCAPTCHASuccess = true
+	}
+
+	reCAPTCHAScoreStr := r.URL.Query().Get(reCAPTCHAScoreQueryStr)
+	log.Println("score: ", reCAPTCHAScoreStr)
+	reCAPTCHAScore, err := strconv.ParseFloat(reCAPTCHAScoreStr, 64)
+	if err != nil {
+		log.Println("Invalid score type: ", err)
+		http.Error(w, "Invalid score type", http.StatusBadRequest)
 		return
 	}
 
-	http.Redirect(w, r, fmt.Sprintf("/success?%s=%f", recaptchaScoreQuery, score), http.StatusFound)
+	reCAPTCHAResult := reCAPTCHAResultStruct{
+		LoginSuccess:     isLoginSuccess,
+		LoginError:       loginErrorStr,
+		ReCAPTCHASuccess: isReCAPTCHASuccess,
+		ReCAPTCHAScore:   reCAPTCHAScore,
+	}
+
+	// Set each params into result page HTML
+	resultPageByte := new(bytes.Buffer)
+	if err := resultPageTemplate.Execute(resultPageByte, reCAPTCHAResult); err != nil {
+		log.Println("Failed to inject values into result page template: ", err)
+		http.Error(w, "Failed to generate result page", http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Fprint(w, resultPageByte.String())
 }
 
 func SuccessPageHandler(w http.ResponseWriter, r *http.Request) {
-	score := r.URL.Query().Get(recaptchaScoreQuery)
+	score := r.URL.Query().Get(reCAPTCHAScoreQueryStr)
 	floatScore, err := strconv.ParseFloat(score, 64)
 	if err != nil {
 		log.Println("Invalid score type: ", err)
