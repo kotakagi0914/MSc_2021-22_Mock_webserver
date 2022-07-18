@@ -60,50 +60,57 @@ func Init() (*http.ServeMux, error) {
 	// Load login page template
 	loginPageTemplateByte, err := os.ReadFile(loginPageTemplateFilePath)
 	if err != nil {
-		log.Println("Failed to load login page template: ", err)
-		return nil, err
+		newErr := fmt.Errorf("[handler.Init()] Failed to load login page template: %v", err)
+		log.Println(newErr.Error())
+		return nil, newErr
 	}
 
 	// Load site-key and secret-key from `.secret` file
 	secretJsonByte, err := os.ReadFile(secretFile)
 	if err != nil {
-		log.Println("Failed to read reCAPTCHA secret file: ", err)
-		return nil, err
+		newErr := fmt.Errorf("[handler.Init()] Failed to read reCAPTCHA secret file: %v", err)
+		log.Println(newErr.Error())
+		return nil, newErr
 	}
 
 	// Unmarshal JSON byte into reCAPTCHASecretStruct type
 	if err := json.Unmarshal(secretJsonByte, &recaptchaSecret); err != nil {
-		log.Println("Failed to unmarshal reCAPTCHA secret: ", err)
-		return nil, err
+		newErr := fmt.Errorf("[handler.Init()] Failed to unmarshal reCAPTCHA secret: %v", err)
+		log.Println(newErr.Error())
+		return nil, newErr
 	}
 
 	// Create template instance for login page
 	loginPageTemp, err := template.New("loginpage").Parse(string(loginPageTemplateByte))
 	if err != nil {
-		log.Println("Failed to create new template instance for login page: ", err)
-		return nil, err
+		newErr := fmt.Errorf("[handler.Init()] Failed to create new template instance for login page: %v", err)
+		log.Println(newErr.Error())
+		return nil, newErr
 	}
 
 	// Set site-key into login page HTML
 	loginPageByte := new(bytes.Buffer)
 	if err := loginPageTemp.Execute(loginPageByte, recaptchaSecret); err != nil {
-		log.Println("Failed to inject values into login page template: ", err)
-		return nil, err
+		newErr := fmt.Errorf("[handler.Init()] Failed to inject values into login page template: %v", err)
+		log.Println(newErr.Error())
+		return nil, newErr
 	}
 	loginPageHTML = loginPageByte.String()
 
 	// Load login result page template
 	resultPageTemplateByte, err := os.ReadFile(resultPageTemplateFilePath)
 	if err != nil {
-		log.Println("Failed to load result page template", err)
-		return nil, err
+		newErr := fmt.Errorf("[handler.Init()] Failed to load result page template: %v", err)
+		log.Println(newErr.Error())
+		return nil, newErr
 	}
 
 	// Create template instance for result page
 	resultPageTemplate, err = template.New("resultpage").Parse(string(resultPageTemplateByte))
 	if err != nil {
-		log.Println("Failed to create new template instance for result page: ", err)
-		return nil, err
+		newErr := fmt.Errorf("[handler.Init()] Failed to create new template instance for result page: %v", err)
+		log.Println(newErr.Error())
+		return nil, newErr
 	}
 
 	return h, nil
@@ -123,7 +130,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Stop processing if request is NOT POST
 	if r.Method != "POST" {
-		loginErrStr = "Invalid HTTP method"
+		loginErrStr = "[handler.LoginHandler()] Invalid HTTP method"
 		log.Println(loginErrStr)
 		http.Redirect(w, r, makeQueryString(isLoginSuccess, isReCAPTCHASuccess, loginErrStr, reCAPTCHAScore), http.StatusFound)
 		return
@@ -138,7 +145,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	// Verify the user with reCAPTCHA
 	isReCAPTCHASuccess, reCAPTCHAScore, err := recaptcha.Verify(recaptchaSecret.SecretKey, urToken, remoteIP)
 	if err != nil {
-		loginErrStr = fmt.Sprintf("Failed to get reCAPTCHA verification result: %v", err)
+		loginErrStr = fmt.Sprintf("[handler.LoginHandler()] Failed to get reCAPTCHA verification result: %v", err)
 		log.Println(loginErrStr)
 		http.Redirect(w, r, makeQueryString(isLoginSuccess, isReCAPTCHASuccess, loginErrStr, reCAPTCHAScore), http.StatusFound)
 		return
@@ -146,7 +153,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Check reCAPTCHA verification result
 	if !isReCAPTCHASuccess {
-		loginErrStr = "reCAPTCHA verification failed"
+		loginErrStr = "[handler.LoginHandler()] reCAPTCHA verification failed"
 		log.Println(loginErrStr)
 		http.Redirect(w, r, makeQueryString(isLoginSuccess, isReCAPTCHASuccess, loginErrStr, reCAPTCHAScore), http.StatusFound)
 		return
@@ -154,7 +161,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Check if the login credentials are valid
 	if un != validUsername || pw != validPassword {
-		loginErrStr = "Invalid username or password"
+		loginErrStr = "[handler.LoginHandler()] Invalid username or password"
 		log.Println(loginErrStr)
 		http.Redirect(w, r, makeQueryString(isLoginSuccess, isReCAPTCHASuccess, loginErrStr, reCAPTCHAScore), http.StatusFound)
 		return
@@ -182,7 +189,7 @@ func LoginResultHandler(w http.ResponseWriter, r *http.Request) {
 	reCAPTCHAScoreStr := r.URL.Query().Get(reCAPTCHAScoreQueryStr)
 	reCAPTCHAScore, err := strconv.ParseFloat(reCAPTCHAScoreStr, 64)
 	if err != nil {
-		log.Println("Invalid score type: ", err)
+		log.Println("[handler.LoginResultHandler()] Invalid score type: ", err)
 		http.Error(w, "Invalid score type", http.StatusBadRequest)
 		return
 	}
@@ -197,7 +204,7 @@ func LoginResultHandler(w http.ResponseWriter, r *http.Request) {
 	// Set each params into result page HTML
 	resultPageByte := new(bytes.Buffer)
 	if err := resultPageTemplate.Execute(resultPageByte, reCAPTCHAResult); err != nil {
-		log.Println("Failed to inject values into result page template: ", err)
+		log.Println("[handler.LoginResultHandler()] Failed to inject values into result page template: ", err)
 		http.Error(w, "Failed to generate result page", http.StatusInternalServerError)
 		return
 	}
@@ -227,10 +234,11 @@ func makeQueryString(isLoginSuccess, isReCAPTCHASuccess bool, loginErrStr string
 - https://gobyexample.com/json
 - https://pkg.go.dev/html/template
 - https://stackoverflow.com/questions/13765797/the-best-way-to-get-a-string-from-a-writer
+- https://kpat.io/2019/06/go-error-propagation/#improvements
 
 # Line Count
-- Total:      220
+- Total:      227
 - Reused:     0
-- Written:    197
+- Written:    204
 - Referenced: 23
 */

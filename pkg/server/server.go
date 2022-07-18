@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
@@ -16,8 +17,9 @@ type Server struct {
 func New() (*Server, error) {
 	h, err := handler.Init()
 	if err != nil {
-		log.Println("Failed to initialise handler pkg: ", err)
-		return nil, err
+		newErr := fmt.Errorf("[server.New()] Failed to initialise handler pkg: %v", err)
+		log.Println(newErr.Error())
+		return nil, newErr
 	}
 
 	return &Server{
@@ -37,8 +39,8 @@ func (s *Server) Run() error {
 - https://pkg.go.dev/net/http
 
 # Line Count
-- Total:      33
+- Total:      35
 - Reused:     0
-- Written:    28
+- Written:    30
 - Referenced: 5
 */

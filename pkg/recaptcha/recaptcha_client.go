@@ -2,6 +2,7 @@ package recaptcha
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/url"
 
@@ -18,7 +19,7 @@ type reCAPTCHAScoreStruct struct {
 	Score   float64 `json:"score"`
 }
 
-func Verify(secretKey, urToken, remoteIP string) (isSuccess bool, score float64, err error) {
+func Verify(secretKey, urToken, remoteIP string) (bool, float64, error) {
 	// Prepare request body with secret-key and UR token
 	reqBody := url.Values{
 		"secret":   {secretKey},
@@ -29,22 +30,21 @@ func Verify(secretKey, urToken, remoteIP string) (isSuccess bool, score float64,
 	// Obtain reCAPTCHA score by sending request to Google
 	res, err := http_client.SendPostRequest(reCAPTCHAVerifyURL, reqBody)
 	if err != nil {
-		log.Println("Failed to get reCAPTCHA score: ", err)
-		return
+		newErr := fmt.Errorf("[recaptcha.Verifty()] Failed to get reCAPTCHA score: %v", err)
+		log.Println(newErr.Error())
+		return false, 0.0, newErr
 	}
 	log.Println("reCAPTCHA result: ", res)
 
 	// Verify score result by parsing response JSON
 	var scoreResult reCAPTCHAScoreStruct
 	if err = json.Unmarshal([]byte(res), &scoreResult); err != nil {
-		log.Println("Failed to unmarshal reCAPTCHA score: ", err)
-		return
+		newErr := fmt.Errorf("[recaptcha.Verify()] Failed to unmarshal reCAPTCHA score: %v", err)
+		log.Println(newErr.Error())
+		return false, 0.0, newErr
 	}
 
-	isSuccess = scoreResult.Success
-	score = scoreResult.Score
-
-	return
+	return scoreResult.Success, scoreResult.Score, nil
 }
 
 /*

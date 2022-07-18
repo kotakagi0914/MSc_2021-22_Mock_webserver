@@ -9,11 +9,11 @@ import (
 func main() {
 	s, err := server.New()
 	if err != nil {
-		log.Fatalln("Failed to initialise server: ", err)
+		log.Fatalln("[main] Failed to initialise server: ", err)
 	}
 
 	if err := s.Run(); err != nil {
-		log.Fatalln("Failed to run server: ", err)
+		log.Fatalln("[main] Failed to run server: ", err)
 	}
 }
 
