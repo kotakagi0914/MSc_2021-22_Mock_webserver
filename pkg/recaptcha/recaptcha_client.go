@@ -18,12 +18,12 @@ type reCAPTCHAScoreStruct struct {
 	Score   float64 `json:"score"`
 }
 
-func Verify(secretKey, urToken string) (isSuccess bool, score float64, err error) {
+func Verify(secretKey, urToken, remoteIP string) (isSuccess bool, score float64, err error) {
 	// Prepare request body with secret-key and UR token
 	reqBody := url.Values{
 		"secret":   {secretKey},
 		"response": {urToken},
-		// "remoteip": {"1.1.1.1"},
+		"remoteip": {remoteIP},
 	}
 
 	// Obtain reCAPTCHA score by sending request to Google

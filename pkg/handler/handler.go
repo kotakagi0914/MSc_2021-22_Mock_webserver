@@ -90,13 +90,14 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Obtain username, password and user response token from POST body in request
+	// Obtain username, password, user response token and client IP address from request
 	un := r.FormValue("username")
 	pw := r.FormValue("password")
 	urToken := r.FormValue("ur-token")
+	remoteIP := r.RemoteAddr
 
 	// Verify the user with reCAPTCHA
-	isSuccess, score, err := recaptcha.Verify(recaptchaSecret.SecretKey, urToken)
+	isSuccess, score, err := recaptcha.Verify(recaptchaSecret.SecretKey, urToken, remoteIP)
 	if err != nil {
 		log.Println("Failed to get reCAPTCHA verification result: ", err)
 		http.Redirect(w, r, "/failure", http.StatusFound)
@@ -147,8 +148,8 @@ func FailurePageHandler(w http.ResponseWriter, r *http.Request) {
 - https://stackoverflow.com/questions/13765797/the-best-way-to-get-a-string-from-a-writer
 
 # Line Count
-- Total:      138
+- Total:      139
 - Reused:     0
-- Written:    119
+- Written:    120
 - Referenced: 19
 */
