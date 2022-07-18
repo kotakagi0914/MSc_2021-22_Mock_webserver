@@ -32,7 +32,7 @@ func Verify(secretKey, urToken string) (isSuccess bool, score float64, err error
 		log.Println("Failed to get reCAPTCHA score: ", err)
 		return
 	}
-	log.Println(res)
+	log.Println("reCAPTCHA result: ", res)
 
 	// Verify score result by parsing response JSON
 	var scoreResult reCAPTCHAScoreStruct
