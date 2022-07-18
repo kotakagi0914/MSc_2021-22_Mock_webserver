@@ -56,8 +56,6 @@ func Init() (*http.ServeMux, error) {
 	h.HandleFunc("/", MainPageHandler)
 	h.HandleFunc("/login", LoginHandler)
 	h.HandleFunc("/login-result", LoginResultHandler)
-	h.HandleFunc("/success", SuccessPageHandler)
-	h.HandleFunc("/failure", FailurePageHandler)
 
 	// Load login page template
 	loginPageTemplateByte, err := os.ReadFile(loginPageTemplateFilePath)
@@ -116,19 +114,20 @@ func MainPageHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
-	// Stop processing if request is NOT POST
-	if r.Method != "POST" {
-		log.Println("Invalid HTTP method")
-		http.Error(w, "Invalid HTTP method", http.StatusMethodNotAllowed)
-		return
-	}
-
 	var (
 		isLoginSuccess     bool
 		loginErrStr        string
 		isReCAPTCHASuccess bool
 		reCAPTCHAScore     float64
 	)
+
+	// Stop processing if request is NOT POST
+	if r.Method != "POST" {
+		loginErrStr = "Invalid HTTP method"
+		log.Println(loginErrStr)
+		http.Redirect(w, r, makeQueryString(isLoginSuccess, isReCAPTCHASuccess, loginErrStr, reCAPTCHAScore), http.StatusFound)
+		return
+	}
 
 	// Obtain username, password, user response token and client IP address from request
 	un := r.FormValue("username")
@@ -139,15 +138,17 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	// Verify the user with reCAPTCHA
 	isReCAPTCHASuccess, reCAPTCHAScore, err := recaptcha.Verify(recaptchaSecret.SecretKey, urToken, remoteIP)
 	if err != nil {
-		log.Println("Failed to get reCAPTCHA verification result: ", err)
-		http.Redirect(w, r, "/failure", http.StatusFound)
+		loginErrStr = fmt.Sprintf("Failed to get reCAPTCHA verification result: %v", err)
+		log.Println(loginErrStr)
+		http.Redirect(w, r, makeQueryString(isLoginSuccess, isReCAPTCHASuccess, loginErrStr, reCAPTCHAScore), http.StatusFound)
 		return
 	}
 
 	// Check reCAPTCHA verification result
 	if !isReCAPTCHASuccess {
-		log.Println("reCAPTCHA verification failed")
-		http.Redirect(w, r, "/failure", http.StatusFound)
+		loginErrStr = "reCAPTCHA verification failed"
+		log.Println(loginErrStr)
+		http.Redirect(w, r, makeQueryString(isLoginSuccess, isReCAPTCHASuccess, loginErrStr, reCAPTCHAScore), http.StatusFound)
 		return
 	}
 
@@ -155,18 +156,12 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if un != validUsername || pw != validPassword {
 		loginErrStr = "Invalid username or password"
 		log.Println(loginErrStr)
-		http.Redirect(
-			w,
-			r,
-			makeQueryString(isLoginSuccess, isReCAPTCHASuccess, loginErrStr, reCAPTCHAScore),
-			http.StatusFound,
-		)
-		// http.Redirect(w, r, "/failure", http.StatusFound)
+		http.Redirect(w, r, makeQueryString(isLoginSuccess, isReCAPTCHASuccess, loginErrStr, reCAPTCHAScore), http.StatusFound)
 		return
 	}
 	isLoginSuccess = true
 
-	http.Redirect(w, r, fmt.Sprintf("/success?%s=%f", reCAPTCHAScoreQueryStr, reCAPTCHAScore), http.StatusFound)
+	http.Redirect(w, r, makeQueryString(isLoginSuccess, isReCAPTCHASuccess, loginErrStr, reCAPTCHAScore), http.StatusFound)
 }
 
 func LoginResultHandler(w http.ResponseWriter, r *http.Request) {
@@ -185,7 +180,6 @@ func LoginResultHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	reCAPTCHAScoreStr := r.URL.Query().Get(reCAPTCHAScoreQueryStr)
-	log.Println("score: ", reCAPTCHAScoreStr)
 	reCAPTCHAScore, err := strconv.ParseFloat(reCAPTCHAScoreStr, 64)
 	if err != nil {
 		log.Println("Invalid score type: ", err)
@@ -209,23 +203,6 @@ func LoginResultHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Fprint(w, resultPageByte.String())
-}
-
-func SuccessPageHandler(w http.ResponseWriter, r *http.Request) {
-	score := r.URL.Query().Get(reCAPTCHAScoreQueryStr)
-	floatScore, err := strconv.ParseFloat(score, 64)
-	if err != nil {
-		log.Println("Invalid score type: ", err)
-		http.Error(w, "Invalid score type", http.StatusBadRequest)
-		return
-	}
-
-	fmt.Fprintf(w, "Login Success: %f", floatScore)
-}
-
-func FailurePageHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("Login Failure")
-	http.Error(w, "Login Failure", http.StatusBadRequest)
 }
 
 func makeQueryString(isLoginSuccess, isReCAPTCHASuccess bool, loginErrStr string, reCAPTCHAScore float64) string {
