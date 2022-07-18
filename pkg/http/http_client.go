@@ -31,8 +31,8 @@ func SendPostRequest(targetURL string, reqBody url.Values) (string, error) {
 - https://pkg.go.dev/net/http
 
 # Line Count
-- Total:      25
+- Total:      27
 - Reused:     0
-- Written:    25
+- Written:    27
 - Referenced: 0
 */
