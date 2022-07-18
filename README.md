@@ -13,4 +13,17 @@ $ vim .secret
 
 ## Run HTTP server
 $ go run cmd/mock-server/main.go
+
+## Access the localhost:8000
+```
+
+## How to run the server through docker image
+```
+## Build docker image
+$ docker build -t <image name> .
+
+## Run the docker container with the image
+$ docker run -d -p <local port>:8000 <image name>
+
+## Access the localhost:`<local port>`
 ```
