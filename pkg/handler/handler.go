@@ -7,11 +7,10 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
 	"strconv"
 
-	"github.com/sheva0914/MSc_2021-22_Mock_webserver/pkg/http_client"
+	"github.com/sheva0914/MSc_2021-22_Mock_webserver/pkg/recaptcha"
 )
 
 const (
@@ -19,7 +18,6 @@ const (
 	secretFile          = "./.secret"
 	validUsername       = "admin"
 	validPassword       = "password"
-	reCAPTCHAVerifyURL  = "https://www.google.com/recaptcha/api/siteverify"
 	recaptchaScoreQuery = "recaptchaScore"
 )
 
@@ -97,24 +95,20 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	pw := r.FormValue("password")
 	urToken := r.FormValue("ur-token")
 
-	// Prepare request body with secret-key and UR token
-	reqBody := url.Values{
-		"secret":   {recaptchaSecret.SecretKey},
-		"response": {urToken},
-		// "remoteip": {"1.1.1.1"},
-	}
-
-	// Obtain reCAPTCHA score by sending request to Google
-	res, err := http_client.SendPostRequest(reCAPTCHAVerifyURL, reqBody)
+	// Verify the user with reCAPTCHA
+	isSuccess, score, err := recaptcha.Verify(recaptchaSecret.SecretKey, urToken)
 	if err != nil {
-		log.Println("Failed to get reCAPTCHA score: ", err)
-		http.Error(w, "Failed to get reCAPTCHA score", http.StatusInternalServerError)
+		log.Println("Failed to get reCAPTCHA verification result: ", err)
+		http.Redirect(w, r, "/failure", http.StatusFound)
 		return
 	}
-	log.Println(res)
 
-	// Dummy score
-	score := "0.5"
+	// Check reCAPTCHA verification result
+	if !isSuccess {
+		log.Println("reCAPTCHA verification failed")
+		http.Redirect(w, r, "/failure", http.StatusFound)
+		return
+	}
 
 	// Check if the login credentials are valid
 	if un != validUsername || pw != validPassword {
@@ -123,7 +117,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, "/success?"+recaptchaScoreQuery+"="+score, http.StatusFound)
+	http.Redirect(w, r, fmt.Sprintf("/success?%s=%f", recaptchaScoreQuery, score), http.StatusFound)
 }
 
 func SuccessPageHandler(w http.ResponseWriter, r *http.Request) {
@@ -153,8 +147,8 @@ func FailurePageHandler(w http.ResponseWriter, r *http.Request) {
 - https://stackoverflow.com/questions/13765797/the-best-way-to-get-a-string-from-a-writer
 
 # Line Count
-- Total:      126
+- Total:      138
 - Reused:     0
-- Written:    107
+- Written:    119
 - Referenced: 19
 */
