@@ -229,8 +229,8 @@ func makeQueryString(isLoginSuccess, isReCAPTCHASuccess bool, loginErrStr string
 - https://stackoverflow.com/questions/13765797/the-best-way-to-get-a-string-from-a-writer
 
 # Line Count
-- Total:      139
+- Total:      220
 - Reused:     0
-- Written:    120
-- Referenced: 19
+- Written:    197
+- Referenced: 23
 */
