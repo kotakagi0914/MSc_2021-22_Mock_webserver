@@ -7,8 +7,11 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
+
+	"github.com/sheva0914/MSc_2021-22_Mock_webserver/pkg/http_client"
 )
 
 const (
@@ -16,6 +19,7 @@ const (
 	secretFile          = "./.secret"
 	validUsername       = "admin"
 	validPassword       = "password"
+	reCAPTCHAVerifyURL  = "https://www.google.com/recaptcha/api/siteverify"
 	recaptchaScoreQuery = "recaptchaScore"
 )
 
@@ -92,7 +96,25 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	un := r.FormValue("username")
 	pw := r.FormValue("password")
 	urToken := r.FormValue("ur-token")
-	log.Println("User Response token: ", urToken)
+
+	// Prepare request body with secret-key and UR token
+	reqBody := url.Values{
+		"secret":   {recaptchaSecret.SecretKey},
+		"response": {urToken},
+		// "remoteip": {"1.1.1.1"},
+	}
+
+	// Obtain reCAPTCHA score by sending request to Google
+	res, err := http_client.SendPostRequest(reCAPTCHAVerifyURL, reqBody)
+	if err != nil {
+		log.Println("Failed to get reCAPTCHA score: ", err)
+		http.Error(w, "Failed to get reCAPTCHA score", http.StatusInternalServerError)
+		return
+	}
+	log.Println(res)
+
+	// Dummy score
+	score := "0.5"
 
 	// Check if the login credentials are valid
 	if un != validUsername || pw != validPassword {
@@ -100,10 +122,6 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/failure", http.StatusFound)
 		return
 	}
-
-	// Verify reCAPTCHA score by sending request to Google
-	// Dummy value for now
-	score := "0.5"
 
 	http.Redirect(w, r, "/success?"+recaptchaScoreQuery+"="+score, http.StatusFound)
 }
