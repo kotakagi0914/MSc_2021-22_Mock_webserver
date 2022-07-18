@@ -123,6 +123,13 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var (
+		isLoginSuccess     bool
+		loginErrStr        string
+		isReCAPTCHASuccess bool
+		reCAPTCHAScore     float64
+	)
+
 	// Obtain username, password, user response token and client IP address from request
 	un := r.FormValue("username")
 	pw := r.FormValue("password")
@@ -130,7 +137,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	remoteIP := r.RemoteAddr
 
 	// Verify the user with reCAPTCHA
-	isSuccess, score, err := recaptcha.Verify(recaptchaSecret.SecretKey, urToken, remoteIP)
+	isReCAPTCHASuccess, reCAPTCHAScore, err := recaptcha.Verify(recaptchaSecret.SecretKey, urToken, remoteIP)
 	if err != nil {
 		log.Println("Failed to get reCAPTCHA verification result: ", err)
 		http.Redirect(w, r, "/failure", http.StatusFound)
@@ -138,7 +145,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check reCAPTCHA verification result
-	if !isSuccess {
+	if !isReCAPTCHASuccess {
 		log.Println("reCAPTCHA verification failed")
 		http.Redirect(w, r, "/failure", http.StatusFound)
 		return
@@ -219,6 +226,20 @@ func SuccessPageHandler(w http.ResponseWriter, r *http.Request) {
 func FailurePageHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("Login Failure")
 	http.Error(w, "Login Failure", http.StatusBadRequest)
+}
+
+func makeQueryString(isLoginSuccess, isReCAPTCHASuccess bool, loginErrStr string, reCAPTCHAScore float64) string {
+	return fmt.Sprintf(
+		"/login-result?%s=%t&%s=%s&%s=%t&%s=%f",
+		loginSuccessQueryStr,
+		isLoginSuccess,
+		loginErrorQueryStr,
+		loginErrStr,
+		reCAPTCHASuccessQueryStr,
+		isReCAPTCHASuccess,
+		reCAPTCHAScoreQueryStr,
+		reCAPTCHAScore,
+	)
 }
 
 /*
