@@ -14,12 +14,20 @@ import (
 )
 
 const (
+	// File paths to template HTMLs
 	loginPageTemplateFilePath  = "./web/template/login-page.html"
 	resultPageTemplateFilePath = "./web/template/result-page.html"
-	secretFile                 = "./.secret"
-	validUsername              = "admin"
-	validPassword              = "password"
-	recaptchaScoreQueryStr     = "score"
+
+	// Credentials
+	secretFile    = "./.secret"
+	validUsername = "admin"
+	validPassword = "password"
+
+	// Query strings for result page
+	loginSuccessQueryStr     = "loginSuccess"
+	loginErrorQueryStr       = "loginError"
+	reCAPTCHASuccessQueryStr = "reCAPTCHASuccess"
+	reCAPTCHAScoreQueryStr   = "reCAPTCHAScore"
 )
 
 // Struct for reCAPTCHA secret containing site-key and secret-key
@@ -28,10 +36,18 @@ type reCAPTCHASecretStruct struct {
 	SecretKey string `json:"secret-key"`
 }
 
+// Struct for reCAPTCHA result containing success flag, score, and error description if applicable
+type reCAPTCHAResultStruct struct {
+	LoginSuccess     bool
+	LoginError       string
+	ReCAPTCHASuccess bool
+	ReCAPTCHAScore   float64
+}
+
 var (
-	recaptchaSecret        reCAPTCHASecretStruct
-	loginPageHTML          string
-	resultPageHTMLTemplate *template.Template
+	recaptchaSecret    reCAPTCHASecretStruct
+	loginPageHTML      string
+	resultPageTemplate *template.Template
 )
 
 func Init() (*http.ServeMux, error) {
@@ -85,7 +101,7 @@ func Init() (*http.ServeMux, error) {
 	}
 
 	// Create template instance for result page
-	resultPageHTMLTemplate, err = template.New("resultpage").Parse(string(resultPageTemplateByte))
+	resultPageTemplate, err = template.New("resultpage").Parse(string(resultPageTemplateByte))
 	if err != nil {
 		log.Println("Failed to create new template instance for result page: ", err)
 		return nil, err
