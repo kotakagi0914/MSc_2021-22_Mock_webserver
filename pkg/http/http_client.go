@@ -1,6 +1,7 @@
 package http
 
 import (
+	"io/ioutil"
 	"log"
 	"net/http"
 )
@@ -15,13 +16,13 @@ func SendPostRequest(targetURL string) (string, error) {
 	defer res.Body.Close()
 
 	// Read response body
-	var resBodyByte []byte
-	if _, err := res.Body.Read(resBodyByte); err != nil {
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
 		log.Println("Failed to read response body: ", err)
 		return "", err
 	}
 
-	return string(resBodyByte), nil
+	return string(body), nil
 }
 
 /*
