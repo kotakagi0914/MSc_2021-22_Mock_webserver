@@ -46,3 +46,15 @@ func Verify(secretKey, urToken string) (isSuccess bool, score float64, err error
 
 	return
 }
+
+/*
+# Reference
+- https://pkg.go.dev/net/http
+- https://zetcode.com/golang/getpostrequest/
+
+# Line Count
+- Total:      48
+- Reused:     0
+- Written:    42
+- Referenced: 6
+*/
