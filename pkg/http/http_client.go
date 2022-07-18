@@ -4,11 +4,12 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 )
 
-func SendPostRequest(targetURL string) (string, error) {
+func SendPostRequest(targetURL string, reqBody url.Values) (string, error) {
 	// Send HTTP POST request to target URL
-	res, err := http.Post(targetURL, "", nil)
+	res, err := http.PostForm(targetURL, reqBody)
 	if err != nil {
 		log.Println("Failed to send POST request: ", err)
 		return "", err
@@ -16,13 +17,13 @@ func SendPostRequest(targetURL string) (string, error) {
 	defer res.Body.Close()
 
 	// Read response body
-	body, err := ioutil.ReadAll(res.Body)
+	resBody, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		log.Println("Failed to read response body: ", err)
 		return "", err
 	}
 
-	return string(body), nil
+	return string(resBody), nil
 }
 
 /*
