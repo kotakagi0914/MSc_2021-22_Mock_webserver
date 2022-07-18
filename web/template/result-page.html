@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Mock Web Server</title>
+    <style>
+        body { font-family: "Ubuntu", monospace; text-align: center }
+        div.login-form { margin:auto; width:300px; border:1px solid #ececec; padding:10px;text-align: left;font-size:13px;}
+        div.login-form div input { margin-bottom:7px;}
+        div.login-form input { width:280px;}
+        div.login-form div:last-child { text-align: center; }
+        div.login-form div:last-child input { width:100px;}
+    </style>
+</head>
+<body>
+    <h2>Mock Web Service</h2>
+    <h3>Login Result</h3>
+    <div name="login-result">
+        <div name="login-sucess">Success: {{.LoginSuccess}}</div>
+        <div name="login-score">Score: {{.LoginScore}}</div>
+        <div name="login-error">Error: {{.LoginError}}</div>
+    </div><br>
+    <form action="/">
+        <input type="submit" value="Go back to login page" />
+    </form>
+</body>
+</html>
+
+<!--
+# Reference
+- https://tryhackme.com/room/phishingyl
+- https://stackoverflow.com/questions/2906582/how-do-i-create-an-html-button-that-acts-like-a-link
+
+# Line Count
+- Total:      27
+- Reused:     15
+- Written:    9
+- Referenced: 3
+-->

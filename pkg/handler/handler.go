@@ -14,11 +14,12 @@ import (
 )
 
 const (
-	templateHTMLFile    = "./web/template/login-page.html"
-	secretFile          = "./.secret"
-	validUsername       = "admin"
-	validPassword       = "password"
-	recaptchaScoreQuery = "recaptchaScore"
+	loginPageTemplateFilePath  = "./web/template/login-page.html"
+	resultPageTemplateFilePath = "./web/template/result-page.html"
+	secretFile                 = "./.secret"
+	validUsername              = "admin"
+	validPassword              = "password"
+	recaptchaScoreQueryStr     = "score"
 )
 
 // Struct for reCAPTCHA secret containing site-key and secret-key
@@ -28,8 +29,9 @@ type reCAPTCHASecretStruct struct {
 }
 
 var (
-	recaptchaSecret reCAPTCHASecretStruct
-	loginPageHTML   string
+	recaptchaSecret        reCAPTCHASecretStruct
+	loginPageHTML          string
+	resultPageHTMLTemplate *template.Template
 )
 
 func Init() (*http.ServeMux, error) {
@@ -41,9 +43,9 @@ func Init() (*http.ServeMux, error) {
 	h.HandleFunc("/failure", FailurePageHandler)
 
 	// Load login page template
-	loginPageTemplateByte, err := os.ReadFile(templateHTMLFile)
+	loginPageTemplateByte, err := os.ReadFile(loginPageTemplateFilePath)
 	if err != nil {
-		log.Println("Failed to load login page template", err)
+		log.Println("Failed to load login page template: ", err)
 		return nil, err
 	}
 
@@ -63,17 +65,31 @@ func Init() (*http.ServeMux, error) {
 	// Create template instance for login page
 	loginPageTemp, err := template.New("loginpage").Parse(string(loginPageTemplateByte))
 	if err != nil {
-		log.Println("Failed to create new template instance: ", err)
+		log.Println("Failed to create new template instance for login page: ", err)
 		return nil, err
 	}
 
 	// Set site-key into login page HTML
 	loginPageByte := new(bytes.Buffer)
 	if err := loginPageTemp.Execute(loginPageByte, recaptchaSecret); err != nil {
-		log.Println("Failed to inject values into template: ", err)
+		log.Println("Failed to inject values into login page template: ", err)
 		return nil, err
 	}
 	loginPageHTML = loginPageByte.String()
+
+	// Load login result page template
+	resultPageTemplateByte, err := os.ReadFile(resultPageTemplateFilePath)
+	if err != nil {
+		log.Println("Failed to load result page template", err)
+		return nil, err
+	}
+
+	// Create template instance for result page
+	resultPageHTMLTemplate, err = template.New("resultpage").Parse(string(resultPageTemplateByte))
+	if err != nil {
+		log.Println("Failed to create new template instance for result page: ", err)
+		return nil, err
+	}
 
 	return h, nil
 }
