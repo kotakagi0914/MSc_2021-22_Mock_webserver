@@ -141,6 +141,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	pw := r.FormValue("password")
 	urToken := r.FormValue("ur-token")
 	remoteIP := r.RemoteAddr
+	log.Println("[handler.LoginHandler()] User Response Token: ", urToken)
 
 	// Verify the user with reCAPTCHA
 	isReCAPTCHASuccess, reCAPTCHAScore, err := recaptcha.Verify(recaptchaSecret.SecretKey, urToken, remoteIP)
