@@ -5,10 +5,11 @@
     <title>Mock Web Server</title>
     <style>
         body { font-family: "Ubuntu", monospace; text-align: center }
-        div.login-form { margin:auto; width:300px; border:1px solid #ececec; padding:10px;text-align: left;font-size:13px;}
+        div.login-form { margin:auto; width:300px; border:1px solid #ececec; padding:10px;text-align:left;font-size:13px;}
         div.login-form div input { margin-bottom:7px;}
         div.login-form input { width:280px;}
-        div.login-form div:last-child { text-align: center; }
+        div.login-form div.checkbox input { text-align:left; width:20px; }
+        div.login-form div:last-child { text-align:center; }
         div.login-form div:last-child input { width:100px;}
     </style>
 </head>
@@ -21,6 +22,10 @@
             <div><input name="username"></div>
             <div>Password:</div>
             <div><input name="password"></div>
+            <div class="checkbox">
+                <input id="checkbox" name="checkbox" type="checkbox" value="robot">
+                <label for="checkbox">I'm a robot.</label>
+            </div>
             <div><input name="ur-token" value="a" type="hidden"></div>
             <div><input name= "submit" type="submit" value="Login" onclick="beforeSubmission(event)"></div>
         </div>
