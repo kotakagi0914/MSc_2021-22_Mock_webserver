@@ -129,6 +129,8 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		reCAPTCHAScore     float64
 	)
 
+	log.Println("[handler.LoginHandler()] Request header: ", r.Header)
+
 	// Stop processing if request is NOT POST
 	if r.Method != "POST" {
 		loginErrStr = "[handler.LoginHandler()] Invalid HTTP method"
