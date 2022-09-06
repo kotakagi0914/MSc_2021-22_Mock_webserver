@@ -241,10 +241,11 @@ func makeQueryString(isLoginSuccess, isReCAPTCHASuccess bool, loginErrStr string
 - https://pkg.go.dev/html/template
 - https://stackoverflow.com/questions/13765797/the-best-way-to-get-a-string-from-a-writer
 - https://kpat.io/2019/06/go-error-propagation/#improvements
+- https://pkg.go.dev/strings#Split
 
 # Line Count
-- Total:      227
+- Total:      233
 - Reused:     0
-- Written:    204
-- Referenced: 23
+- Written:    209
+- Referenced: 24
 */
