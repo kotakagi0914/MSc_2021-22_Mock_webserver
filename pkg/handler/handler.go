@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/sheva0914/MSc_2021-22_Mock_webserver/pkg/recaptcha"
 )
@@ -140,8 +141,10 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	un := r.FormValue("username")
 	pw := r.FormValue("password")
 	urToken := r.FormValue("ur-token")
-	remoteIP := r.RemoteAddr
 	log.Println("[handler.LoginHandler()] User Response Token: ", urToken)
+	addrElements := strings.Split(r.RemoteAddr, ":")
+	remoteIP := addrElements[0]
+	log.Println("[handler.LoginHandler()] Remote IP address: ", remoteIP)
 
 	// Verify the user with reCAPTCHA
 	isReCAPTCHASuccess, reCAPTCHAScore, err := recaptcha.Verify(recaptchaSecret.SecretKey, urToken, remoteIP)
